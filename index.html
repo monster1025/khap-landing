@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Королевский Хап — бот для охоты за скидками на Wildberries</title>
+<meta name="description" content="Бот «Королевский Хап» находит ценовые ошибки и лучшие скидки на Wildberries и присылает их вам первым в Telegram. Подключайтесь за 185 ₽.">
+<meta property="og:title" content="Королевский Хап — бот для охоты за скидками на Wildberries">
+<meta property="og:description" content="Мгновенные уведомления о ценовых ошибках и скидках на WB прямо в Telegram. Кнопка покупки без захода на сайт. Автовыкуп по правилам.">
+<meta name="theme-color" content="#0f0a1c">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='48' font-size='48'%3E%F0%9F%91%91%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f0a1c;
+    --bg-2:#150f27;
+    --card:#1b1433;
+    --card-2:#221a3d;
+    --border:rgba(196,167,255,.14);
+    --text:#f3eefc;
+    --muted:#a99cc9;
+    --muted-2:#8377a3;
+    --violet:#8b5cf6;
+    --violet-2:#6d28d9;
+    --violet-glow:rgba(139,92,246,.35);
+    --gold:#f0c34e;
+    --gold-2:#c99a2e;
+    --gold-glow:rgba(240,195,78,.35);
+    --green:#3ddc97;
+    --radius:20px;
+    --maxw:1120px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, var(--violet-glow), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 10%, rgba(240,195,78,.12), transparent 55%),
+      linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+    background-attachment:fixed;
+    color:var(--text);
+    font-family:'Manrope', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,.crown-font{font-family:'Cinzel', Georgia, serif;}
+  a{color:inherit;text-decoration:none;}
+  img{max-width:100%;display:block;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px;}
+  section{position:relative;padding:96px 0;}
+  section.tight{padding:64px 0;}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--gold);
+    background:rgba(240,195,78,.1);
+    border:1px solid rgba(240,195,78,.25);
+    border-radius:999px;padding:7px 16px;
+    margin-bottom:22px;
+  }
+  h2{font-size:clamp(28px,4vw,42px);font-weight:700;letter-spacing:.01em;margin-bottom:14px;}
+  .lede{color:var(--muted);font-size:17px;max-width:620px;}
+  .center{text-align:center;margin-left:auto;margin-right:auto;}
+
+  /* ---------- header ---------- */
+  header{
+    position:sticky;top:0;z-index:50;
+    background:rgba(15,10,28,.72);
+    backdrop-filter:blur(14px) saturate(140%);
+    border-bottom:1px solid var(--border);
+  }
+  header .wrap{display:flex;align-items:center;justify-content:space-between;height:72px;}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;letter-spacing:.02em;}
+  .logo .crown{width:26px;height:26px;color:var(--gold);}
+  .nav-links{display:flex;gap:28px;font-size:15px;color:var(--muted);}
+  .nav-links a:hover{color:var(--text);}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    font-weight:700;font-size:15px;
+    padding:13px 26px;border-radius:14px;
+    border:1px solid transparent;
+    cursor:pointer;transition:transform .15s ease, box-shadow .2s ease, filter .2s ease;
+    white-space:nowrap;
+  }
+  .btn:active{transform:scale(.97);}
+  .btn-gold{
+    background:linear-gradient(135deg, var(--gold) 0%, var(--gold-2) 100%);
+    color:#241704;
+    box-shadow:0 10px 30px -8px var(--gold-glow), 0 0 0 1px rgba(240,195,78,.35) inset;
+  }
+  .btn-gold:hover{filter:brightness(1.08);box-shadow:0 14px 34px -6px var(--gold-glow);}
+  .btn-ghost{
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--border);
+    color:var(--text);
+  }
+  .btn-ghost:hover{background:rgba(255,255,255,.08);}
+  .btn-sm{padding:10px 18px;font-size:14px;border-radius:12px;}
+  .btn-block{width:100%;}
+  header .btn{padding:10px 20px;font-size:14px;}
+  .burger{display:none;background:none;border:0;color:var(--text);width:40px;height:40px;}
+
+  /* ---------- hero ---------- */
+  .hero{padding-top:64px;padding-bottom:40px;}
+  .hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:52px;align-items:center;}
+  .hero h1{font-size:clamp(34px,5.4vw,58px);line-height:1.12;margin-bottom:22px;}
+  .hero h1 .accent{
+    background:linear-gradient(90deg, var(--gold) 0%, #ffe08a 45%, var(--violet) 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .hero p.lede{font-size:18px;margin-bottom:32px;}
+  .hero-cta{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:26px;}
+  .trust-row{display:flex;gap:22px;flex-wrap:wrap;color:var(--muted-2);font-size:13px;}
+  .trust-row span{display:flex;align-items:center;gap:7px;}
+  .trust-row svg{width:16px;height:16px;color:var(--green);flex-shrink:0;}
+
+  /* phone mock */
+  .phone{
+    position:relative;border-radius:34px;
+    background:linear-gradient(160deg, var(--card-2), var(--card));
+    border:1px solid var(--border);
+    padding:18px;
+    box-shadow:0 40px 80px -30px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.03) inset;
+  }
+  .phone-head{display:flex;align-items:center;gap:10px;padding:6px 8px 14px;border-bottom:1px solid var(--border);margin-bottom:14px;}
+  .phone-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--violet-2));display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+  .phone-head b{font-size:14px;}
+  .phone-head small{display:block;color:var(--green);font-size:11px;}
+  .bubble{
+    background:var(--card-2);
+    border:1px solid var(--border);
+    border-radius:16px;padding:14px 16px;margin-bottom:12px;
+    font-size:13.5px;
+  }
+  .bubble b{color:var(--gold);}
+  .bubble .tag{
+    display:inline-block;background:rgba(61,220,151,.14);color:var(--green);
+    font-size:11px;font-weight:700;border-radius:8px;padding:3px 8px;margin-bottom:8px;
+  }
+  .bubble .price-old{color:var(--muted-2);text-decoration:line-through;font-size:12.5px;}
+  .bubble .price-new{color:var(--green);font-weight:800;font-size:16px;}
+  .bubble .buybtn{
+    margin-top:10px;display:flex;align-items:center;justify-content:center;gap:6px;
+    background:rgba(139,92,246,.16);border:1px solid rgba(139,92,246,.4);
+    color:#d8c8ff;font-weight:700;font-size:12.5px;border-radius:10px;padding:9px;
+  }
+  .float-badge{
+    position:absolute;background:var(--card);border:1px solid var(--border);
+    border-radius:14px;padding:10px 14px;font-size:12.5px;font-weight:700;
+    box-shadow:0 20px 40px -18px rgba(0,0,0,.6);
+    display:flex;align-items:center;gap:8px;
+  }
+  .float-badge.b1{top:-18px;right:-14px;color:var(--gold);}
+  .float-badge.b2{bottom:18px;left:-22px;color:var(--green);}
+  .float-badge svg{width:16px;height:16px;}
+
+  /* ---------- how it works ---------- */
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:56px;}
+  .step{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:26px 22px;position:relative;
+  }
+  .step .num{
+    font-family:'Cinzel',serif;font-weight:900;font-size:34px;
+    color:transparent;-webkit-text-stroke:1.5px var(--gold);
+    margin-bottom:14px;display:block;
+  }
+  .step h3{font-size:16.5px;margin-bottom:8px;font-family:'Manrope';font-weight:800;}
+  .step p{color:var(--muted);font-size:14px;}
+
+  /* ---------- features ---------- */
+  .features{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:56px;}
+  .feature{
+    background:linear-gradient(165deg, var(--card) 0%, var(--card-2) 100%);
+    border:1px solid var(--border);border-radius:var(--radius);
+    padding:28px 24px;transition:transform .2s ease, border-color .2s ease;
+  }
+  .feature:hover{transform:translateY(-4px);border-color:rgba(196,167,255,.3);}
+  .feature .icon{
+    width:46px;height:46px;border-radius:13px;margin-bottom:18px;
+    display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,rgba(139,92,246,.25),rgba(240,195,78,.18));
+    border:1px solid var(--border);
+  }
+  .feature .icon svg{width:24px;height:24px;color:var(--gold);}
+  .feature h3{font-size:17px;margin-bottom:8px;font-family:'Manrope';font-weight:800;}
+  .feature p{color:var(--muted);font-size:14.5px;}
+
+  /* ---------- pricing ---------- */
+  .pricing-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:56px;align-items:stretch;}
+  .price-card{
+    position:relative;
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:28px 22px;display:flex;flex-direction:column;
+  }
+  .price-card.featured{
+    background:linear-gradient(165deg, rgba(139,92,246,.16), var(--card) 60%);
+    border-color:rgba(139,92,246,.5);
+    box-shadow:0 20px 50px -24px var(--violet-glow);
+  }
+  .price-card .badge{
+    position:absolute;top:-13px;left:50%;transform:translateX(-50%);
+    background:linear-gradient(135deg,var(--gold),var(--gold-2));
+    color:#241704;font-size:11.5px;font-weight:800;border-radius:999px;
+    padding:5px 14px;white-space:nowrap;
+  }
+  .price-card .period{font-size:15px;color:var(--muted);margin-bottom:6px;}
+  .price-card .amount{font-size:34px;font-weight:800;margin-bottom:2px;}
+  .price-card .amount small{font-size:15px;color:var(--muted);font-weight:600;}
+  .price-card .perday{font-size:12.5px;color:var(--muted-2);margin-bottom:18px;}
+  .price-card ul{list-style:none;margin-bottom:22px;flex-grow:1;}
+  .price-card li{
+    display:flex;gap:9px;align-items:flex-start;font-size:13.5px;color:var(--muted);
+    margin-bottom:10px;
+  }
+  .price-card li svg{width:15px;height:15px;color:var(--green);flex-shrink:0;margin-top:2px;}
+  .price-card .refbonus{
+    font-size:12px;color:var(--gold);background:rgba(240,195,78,.1);
+    border:1px solid rgba(240,195,78,.25);border-radius:10px;padding:6px 10px;margin-bottom:18px;
+  }
+
+  /* ---------- proof ---------- */
+  .proof-wrap{
+    background:var(--card);border:1px solid var(--border);border-radius:28px;
+    padding:52px 40px;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;
+  }
+  .proof-links{display:flex;flex-direction:column;gap:14px;margin-top:22px;}
+  .proof-link{
+    display:flex;align-items:center;gap:12px;
+    background:var(--card-2);border:1px solid var(--border);border-radius:14px;
+    padding:14px 16px;font-weight:700;font-size:14.5px;transition:border-color .2s;
+  }
+  .proof-link:hover{border-color:rgba(196,167,255,.35);}
+  .proof-link svg{width:20px;height:20px;color:var(--gold);flex-shrink:0;}
+  .proof-link span.sub{display:block;color:var(--muted);font-weight:500;font-size:12.5px;margin-top:2px;}
+  .quote{font-size:19px;color:var(--text);font-family:'Cinzel',serif;line-height:1.5;}
+  .quote span{color:var(--gold);}
+
+  /* ---------- faq ---------- */
+  .faq-list{margin-top:44px;display:flex;flex-direction:column;gap:12px;}
+  details{
+    background:var(--card);border:1px solid var(--border);border-radius:16px;
+    padding:4px 22px;
+  }
+  details summary{
+    cursor:pointer;list-style:none;padding:18px 0;font-weight:700;font-size:15.5px;
+    display:flex;align-items:center;justify-content:space-between;gap:14px;
+  }
+  details summary::-webkit-details-marker{display:none;}
+  details summary .plus{color:var(--gold);font-size:20px;font-weight:400;transition:transform .2s;flex-shrink:0;}
+  details[open] summary .plus{transform:rotate(45deg);}
+  details p{color:var(--muted);font-size:14.5px;padding-bottom:20px;padding-right:28px;}
+
+  /* ---------- final cta ---------- */
+  .final-cta{
+    text-align:center;border-radius:32px;
+    background:
+      radial-gradient(ellipse 500px 260px at 50% 0%, var(--violet-glow), transparent 70%),
+      linear-gradient(165deg, var(--card-2), var(--card));
+    border:1px solid var(--border);
+    padding:72px 32px;
+  }
+  .final-cta h2{margin-bottom:16px;}
+  .final-cta .lede{margin:0 auto 34px;}
+
+  /* ---------- footer ---------- */
+  footer{padding:48px 0 40px;border-top:1px solid var(--border);}
+  .footer-grid{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;}
+  .footer-links{display:flex;gap:22px;color:var(--muted);font-size:14px;flex-wrap:wrap;}
+  .footer-links a:hover{color:var(--text);}
+  .footer-note{color:var(--muted-2);font-size:12.5px;margin-top:22px;}
+
+  /* ---------- reveal animation ---------- */
+  .reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease, transform .6s ease;}
+  .reveal.show{opacity:1;transform:none;}
+
+  /* ---------- responsive ---------- */
+  @media (max-width:980px){
+    .hero-grid{grid-template-columns:1fr;}
+    .phone{max-width:360px;margin:0 auto;}
+    .steps{grid-template-columns:repeat(2,1fr);}
+    .features{grid-template-columns:repeat(2,1fr);}
+    .pricing-grid{grid-template-columns:repeat(2,1fr);}
+    .proof-wrap{grid-template-columns:1fr;padding:36px 26px;}
+  }
+  @media (max-width:640px){
+    section{padding:64px 0;}
+    .nav-links{display:none;}
+    .steps{grid-template-columns:1fr;}
+    .features{grid-template-columns:1fr;}
+    .pricing-grid{grid-template-columns:1fr;}
+    .hero-cta{flex-direction:column;align-items:stretch;}
+    .hero-cta .btn{width:100%;}
+    .footer-grid{flex-direction:column;align-items:flex-start;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="logo" href="#top">
+      <svg class="crown" viewBox="0 0 24 24" fill="none"><path d="M2 19h20M3 19l-1-9 4.5 3L12 6l5.5 7L22 10l-1 9" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" fill="rgba(240,195,78,.15)"/></svg>
+      Королевский&nbsp;Хап
+    </a>
+    <nav class="nav-links">
+      <a href="#how">Как это работает</a>
+      <a href="#features">Возможности</a>
+      <a href="#pricing">Тарифы</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <a class="btn btn-gold" href="https://t.me/king_gate_keeper_bot" target="_blank" rel="noopener">Подписаться</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow">👑 Бот-охотник за скидками WB</span>
+        <h1>Ловите <span class="accent">ценовые ошибки</span> и лучшие скидки Wildberries раньше всех</h1>
+        <p class="lede">«Королевский Хап» сканирует Wildberries 24/7 и мгновенно присылает в Telegram товары с сильно заниженной ценой — пока их не выкупили другие.</p>
+        <div class="hero-cta">
+          <a class="btn btn-gold" href="https://t.me/king_gate_keeper_bot" target="_blank" rel="noopener">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M22 2L2 10.5l7 2.5M22 2L14.5 21l-5.5-8M22 2L9 13" stroke="#241704" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Оформить подписку
+          </a>
+          <a class="btn btn-ghost" href="#pricing">Смотреть тарифы</a>
+        </div>
+        <div class="trust-row">
+          <span><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Подписка от 185 ₽</span>
+          <span><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Покупка прямо из Telegram</span>
+          <span><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Бонусные дни за друзей</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="phone">
+          <div class="float-badge b1">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z" stroke="currentColor" stroke-width="1.8" fill="rgba(240,195,78,.2)"/></svg>
+            Хап найден!
+          </div>
+          <div class="phone-head">
+            <div class="phone-avatar">👑</div>
+            <div>
+              <b>Королевский Стражник</b>
+              <small>● в сети</small>
+            </div>
+          </div>
+          <div class="bubble">
+            <span class="tag">🔥 Ценовая ошибка</span><br>
+            Кроссовки беговые, р. 38–42<br>
+            <span class="price-old">4 990 ₽</span> → <span class="price-new">690 ₽</span><br>
+            🚚 склад WB · осталось 6 шт.
+            <div class="buybtn">📲 Купить прямо в боте</div>
+          </div>
+          <div class="bubble">
+            <span class="tag" style="background:rgba(139,92,246,.16);color:#c9b3ff;">🤖 Автовыкуп</span><br>
+            Правило «Кроссовки до 1000₽» — заказ создан автоматически
+          </div>
+          <div class="float-badge b2">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z" stroke="currentColor" stroke-width="1.8" fill="rgba(61,220,151,.2)"/></svg>
+            −86% к цене
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how">
+    <div class="wrap">
+      <span class="eyebrow center" style="display:table;margin-left:auto;margin-right:auto;">Как это работает</span>
+      <h2 class="center">От ошибки в цене до заказа — за секунды</h2>
+      <p class="lede center">Никакого ручного мониторинга каталога. Бот делает всё сам, вам остаётся только забрать товар.</p>
+
+      <div class="steps">
+        <div class="step reveal">
+          <span class="num">01</span>
+          <h3>Бот сканирует WB</h3>
+          <p>Непрерывно проверяет цены и остатки тысяч товаров на Wildberries по всем складам.</p>
+        </div>
+        <div class="step reveal">
+          <span class="num">02</span>
+          <h3>Находит «хап»</h3>
+          <p>Замечает товары с ценовой ошибкой или резкой скидкой, которые продавец скоро исправит.</p>
+        </div>
+        <div class="step reveal">
+          <span class="num">03</span>
+          <h3>Присылает в Telegram</h3>
+          <p>Вы получаете ссылку с ценой, складом и остатком — мгновенно, пока товар ещё доступен.</p>
+        </div>
+        <div class="step reveal">
+          <span class="num">04</span>
+          <h3>Забираете хап</h3>
+          <p>Покупаете сами одной кнопкой в боте — или бот сделает заказ за вас по вашим правилам автовыкупа.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="features">
+    <div class="wrap">
+      <span class="eyebrow center" style="display:table;margin-left:auto;margin-right:auto;">Возможности</span>
+      <h2 class="center">Всё, чтобы не пропустить ни одного хапа</h2>
+
+      <div class="features">
+        <div class="feature reveal">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4m11.4-11.4 1.4-1.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.8"/></svg></div>
+          <h3>Мгновенные уведомления</h3>
+          <p>Как только бот находит подходящий товар — ссылка приходит вам в Telegram сразу, без задержек.</p>
+        </div>
+        <div class="feature reveal">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="2" width="16" height="20" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M9 18h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          <h3>Кнопка «Купить»</h3>
+          <p>Заказывайте товар прямо из Telegram одним нажатием — без перехода на сайт Wildberries.</p>
+        </div>
+        <div class="feature reveal">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="7" width="18" height="13" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 7V5a4 4 0 0 1 8 0v2" stroke="currentColor" stroke-width="1.8"/></svg></div>
+          <h3>Автовыкуп по правилам</h3>
+          <p>Настройте фильтр по товару и цене — бот оформит заказ автоматически, даже если вы не онлайн.</p>
+        </div>
+        <div class="feature reveal">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none"><path d="M17 20c0-3-2.5-5-5-5s-5 2-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.8"/><path d="M2 20c.3-2 1.7-3.6 3.5-4.3M22 20c-.3-2-1.7-3.6-3.5-4.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          <h3>Реферальная программа</h3>
+          <p>Приглашайте друзей по своей ссылке и получайте бонусные дни подписки за каждого.</p>
+        </div>
+        <div class="feature reveal">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.5 8.5 0 1 1-3.3-6.7L21 4l-1 3.6a8.5 8.5 0 0 1 1 3.9Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
+          <h3>Живое комьюнити</h3>
+          <p>Общий чат и канал с «хвастами» — реальные покупки подписчиков, которые бот помог найти.</p>
+        </div>
+        <div class="feature reveal">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3 3 7v6c0 4.5 4 7.5 9 8 5-.5 9-3.5 9-8V7l-9-4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
+          <h3>Все склады WB</h3>
+          <p>Учитываются остатки на складах по всей стране — вы видите, где именно есть товар и сколько штук.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section id="pricing">
+    <div class="wrap">
+      <span class="eyebrow center" style="display:table;margin-left:auto;margin-right:auto;">Тарифы</span>
+      <h2 class="center">Чем дольше подписка — тем дешевле день</h2>
+      <p class="lede center">Все тарифы включают полный доступ к боту со ссылками и кнопку покупки прямо в Telegram. Оплата и выбор тарифа — внутри бота.</p>
+
+      <div class="pricing-grid">
+        <div class="price-card reveal">
+          <div class="period">7 дней</div>
+          <div class="amount">185 ₽</div>
+          <div class="perday">≈ 26,4 ₽ / день</div>
+          <ul>
+            <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Доступ к боту со ссылками</li>
+            <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Кнопка покупки в Telegram</li>
+          </ul>
+          <div class="refbonus">+2 дня за приглашённого друга</div>
+          <a class="btn btn-ghost btn-block" href="https://t.me/king_gate_keeper_bot" target="_blank" rel="noopener">Выбрать</a>
+        </div>
+
+        <div class="price-card reveal">
+          <div class="period">14 дней</div>
+          <div class="amount">300 ₽</div>
+          <div class="perday">≈ 21,4 ₽ / день</div>
+          <ul>
+            <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Доступ к боту со ссылками</li>
+            <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Кнопка покупки в Telegram</li>
+          </ul>
+          <div class="refbonus">+3 дня за приглашённого друга</div>
+          <a class="btn btn-ghost btn-block" href="https://t.me/king_gate_keeper_bot" target="_blank" rel="noopener">Выбрать</a>
+        </div>
+
+        <div class="price-card featured reveal">
+          <div class="badge">Популярный</div>
+          <div class="period">30 дней</div>
+          <div class="amount">500 ₽</div>
+          <div class="perday">≈ 16,7 ₽ / день</div>
+          <ul>
+            <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Доступ к боту со ссылками</li>
+            <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Кнопка покупки в Telegram</li>
+          </ul>
+          <div class="refbonus">+7 дней за приглашённого друга</div>
+          <a class="btn btn-gold btn-block" href="https://t.me/king_gate_keeper_bot" target="_blank" rel="noopener">Выбрать</a>
+        </div>
+
+        <div class="price-card reveal">
+          <div class="badge" style="background:linear-gradient(135deg,var(--green),#1fae74);color:#04231a;">Выгоднее всего</div>
+          <div class="period">60 дней</div>
+          <div class="amount">949 ₽</div>
+          <div class="perday">≈ 15,8 ₽ / день</div>
+          <ul>
+            <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Доступ к боту со ссылками</li>
+            <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Кнопка покупки в Telegram</li>
+          </ul>
+          <div class="refbonus">+15 дней за приглашённого друга</div>
+          <a class="btn btn-ghost btn-block" href="https://t.me/king_gate_keeper_bot" target="_blank" rel="noopener">Выбрать</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOCIAL PROOF -->
+  <section class="tight">
+    <div class="wrap">
+      <div class="proof-wrap reveal">
+        <div>
+          <p class="quote">«Каждый день в чате — <span>новые хвасты</span> подписчиков: кто и что успел забрать по бросовой цене.»</p>
+        </div>
+        <div class="proof-links">
+          <a class="proof-link" href="https://t.me/hap_king" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.5 8.5 0 1 1-3.3-6.7L21 4l-1 3.6a8.5 8.5 0 0 1 1 3.9Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+            <span>Подборка хапов в Telegram<span class="sub">t.me/hap_king</span></span>
+          </a>
+          <a class="proof-link" href="https://vk.com/king_wildberries" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 3 3 7v6c0 4.5 4 7.5 9 8 5-.5 9-3.5 9-8V7l-9-4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+            <span>Сообщество во ВКонтакте<span class="sub">vk.com/king_wildberries</span></span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq">
+    <div class="wrap">
+      <span class="eyebrow center" style="display:table;margin-left:auto;margin-right:auto;">FAQ</span>
+      <h2 class="center">Частые вопросы</h2>
+
+      <div class="faq-list">
+        <details>
+          <summary>Как оформить подписку?<span class="plus">+</span></summary>
+          <p>Перейдите в бота <a href="https://t.me/king_gate_keeper_bot" target="_blank" rel="noopener" style="color:var(--gold);text-decoration:underline;">@king_gate_keeper_bot</a>, нажмите «Старт» и выберите тариф — оплата проходит прямо в Telegram.</p>
+        </details>
+        <details>
+          <summary>Какими способами можно оплатить?<span class="plus">+</span></summary>
+          <p>Банковской картой, через ЮMoney/СБП и другие способы, доступные в боте на момент оплаты. Для отдельных регионов есть альтернативные варианты — уточняйте у поддержки.</p>
+        </details>
+        <details>
+          <summary>Что если товар выкупят раньше меня?<span class="plus">+</span></summary>
+          <p>Ссылки уходят всем подписчикам одновременно, поэтому шанс есть у каждого — но не гарантирован. Автовыкуп по правилам повышает ваши шансы, оформляя заказ автоматически.</p>
+        </details>
+        <details>
+          <summary>Как работает реферальная программа?<span class="plus">+</span></summary>
+          <p>В боте есть раздел «Реф. программа» со своей ссылкой. Друг переходит по ней и нажимает «Старт» — после его оплаты вам начисляются бонусные дни подписки.</p>
+        </details>
+        <details>
+          <summary>Куда обращаться, если что-то не работает?<span class="plus">+</span></summary>
+          <p>Пишите в поддержку <a href="https://t.me/king_supports" target="_blank" rel="noopener" style="color:var(--gold);text-decoration:underline;">@king_supports</a>, а подробные разборы частых вопросов есть на <a href="https://faq.khap.ru" target="_blank" rel="noopener" style="color:var(--gold);text-decoration:underline;">faq.khap.ru</a>.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="tight">
+    <div class="wrap">
+      <div class="final-cta reveal">
+        <span class="eyebrow center" style="display:table;margin-left:auto;margin-right:auto;">Пора начинать</span>
+        <h2>Не пропустите свой первый хап</h2>
+        <p class="lede center">Подключитесь за пару минут — и уже сегодня получите первую ссылку на выгодную покупку.</p>
+        <a class="btn btn-gold" href="https://t.me/king_gate_keeper_bot" target="_blank" rel="noopener">Открыть бота и подписаться</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <a class="logo" href="#top">
+        <svg class="crown" viewBox="0 0 24 24" fill="none"><path d="M2 19h20M3 19l-1-9 4.5 3L12 6l5.5 7L22 10l-1 9" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" fill="rgba(240,195,78,.15)"/></svg>
+        Королевский&nbsp;Хап
+      </a>
+      <div class="footer-links">
+        <a href="https://t.me/king_gate_keeper_bot" target="_blank" rel="noopener">Бот «Стражник»</a>
+        <a href="https://faq.khap.ru" target="_blank" rel="noopener">FAQ</a>
+        <a href="https://t.me/hap_king" target="_blank" rel="noopener">Канал с хапами</a>
+        <a href="https://t.me/king_supports" target="_blank" rel="noopener">Поддержка</a>
+      </div>
+    </div>
+    <p class="footer-note">Королевский Хап — независимый сервис уведомлений о ценах Wildberries. Не является официальным приложением Wildberries.</p>
+  </div>
+</footer>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var els = document.querySelectorAll('.reveal');
+    if (!('IntersectionObserver' in window)) {
+      els.forEach(function (el) { el.classList.add('show'); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('show');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    els.forEach(function (el) { io.observe(el); });
+  });
+</script>
+
+</body>
+</html>

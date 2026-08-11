@@ -1,0 +1,13 @@
+version: '3.7'
+services:
+  khap-landing:
+    build: ./
+    image: gitea.yandex5.ru/monster/khap-landing:master
+    container_name: khap-landing
+    restart: always
+    ports:
+      - "5060:80"
+    logging:
+      driver: json-file
+      options:
+        max-size: 50m
